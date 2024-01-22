@@ -79,7 +79,7 @@ func Get(hash string, id int, db *sql.DB) Member {
 }
 
 func Voted(hash string, db *sql.DB) (int, error) {
-	q := "select sum(votecount) from member where roomurl = '" + database.Escape(hash) + "'"
+	q := "select ifnull(sum(votecount), 0) from member where roomurl = '" + database.Escape(hash) + "'"
 	rows, err := db.Query(q)
 	if err != nil {
 		log.Println("member.Voted db.Query")
@@ -146,7 +146,7 @@ func VoteEnd(hash string) (bool, error) {
 	db := database.Connect()
 	defer db.Close()
 
-	q := "select (select sum(votecount) as sumvote from member where roomurl = '" + hash + "') = playercount from room where `url` = '" + hash + "'"
+	q := "select (select ifnull(sum(votecount), 0) as sumvote from member where roomurl = '" + hash + "') = playercount from room where `url` = '" + hash + "'"
 	rows, err := db.Query(q)
 	if err != nil {
 		log.Println("member.VoteEnd db.Query")
