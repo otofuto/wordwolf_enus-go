@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"os"
 	"strings"
@@ -17,10 +16,7 @@ import (
 )
 
 func Connect() *sql.DB {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(err)
-	}
+	godotenv.Load()
 
 	connectionstring := os.Getenv("DB_USER") + ":" + os.Getenv("DB_PASS") + "@" + os.Getenv("DB_HOST") + "/" + os.Getenv("DB_NAME") + ""
 	db, err := sql.Open("mysql", connectionstring)
