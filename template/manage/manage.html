@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>管理ページ</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/">
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>管理ページ</h1>
+		</div>
+		<div onclick="location = '/manage/category';" class="button" tabindex="0">カテゴリ登録</div>
+		<div onclick="location = '/manage/categorylist';" class="button" tabindex="0">カテゴリ一覧</div>
+		<div onclick="location = '/manage/question';" class="button" tabindex="0">問題入稿</div>
+		<div onclick="location = '/manage/questionlist';" class="button" tabindex="0">問題一覧</div>
+		<div onclick="location = '/manage/newaccount';" class="button" tabindex="0">アカウント作成</div>
+		<div onclick="location = '/manage/bloglist';" class="button" tabindex="0">ブログ管理</div>
+		<div onclick="location = '/manage/html';" class="button" tabindex="0">アフィリエイトタグ編集</div>
+		<div onclick="location = '/manage/logout';" class="button" tabindex="0">ログアウト</div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+		</script>
+	</body>
+</html>

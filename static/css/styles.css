@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap');
+
+body {
+	background-color: #0e1539;
+	color: white;
+	font-family: 'Noto Serif JP', serif;
+}
+
+div {
+	margin: 0 auto;
+	width: 100%;
+	text-align: center;
+}
+
+a {
+	color: white;
+	text-decoration: underline;
+}
+
+h2 {
+	font-size: 1.5em;
+}
+
+.navbar-toggler .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+}
+
+.button {
+	border-radius: 10px;
+	background-color: #FCE5CD;
+	color: #0e1539;
+	font-size: 1.4em;
+	padding: 10px 0;
+	margin: 20px auto;
+	width: 70%;
+	box-shadow: 0 0 5px white;
+	cursor: default;
+	transition: all 200ms 0ms ease;
+	outline: none;
+	user-select: none;
+}
+
+.button:hover {
+	width: 68%;
+	padding: 8px 0;
+	margin: 22px auto;
+}
+
+.button:focus {
+	width: 68%;
+	padding: 8px 0;
+	margin: 22px auto;
+}
+
+#page-header {
+	position: static;
+	top: 0;
+	bottom: auto;
+	right: 0;
+	margin: 0;
+}
+
+#page-footer {
+	position: relative;
+	top: auto;
+	bottom: 0;
+	right: 0;
+	margin: 0;
+}
+
+.timer {
+	border-radius: 10px;
+	background-color: #FCE5CD;
+	color: #0e1539;
+	font-size: 1.4em;
+	padding: 10px 0;
+	margin: 20px auto;
+	width: 70%;
+}
+
+input {
+	margin: 0 2%;
+	border: solid 2px #ea9999;
+	border-radius: 10px;
+	width: 96%;
+	font-size: 1.5em;
+	text-align: center;
+}
+
+input[type=text] {
+	outline: none;
+}
+
+input[type=text]:focus {
+	box-shadow: 0 0 10px #ea9999;
+}
+
+select {
+	margin: 0 2%;
+	border: solid 2px #ea9999;
+	border-radius: 10px;
+	width: 96%;
+	font-size: 1.5em;
+	text-align: center;
+}
+
+.count_div {
+	display: inline-block;
+	margin: 0 2%;
+	border: solid 2px #ea9999;
+	border-radius: 10px;
+	width: 96%;
+	text-align: center;
+	font-size: 1em;
+	background-color: white;
+	color: #0e1539;
+}
+
+.count {
+	width: 60%;
+	border: none;
+	outline: none;
+}
+
+.time {
+	width: 20%;
+	border: none;
+	outline: none;
+}
+
+#waitmember {
+	border: solid 2px #ea9999;
+	border-radius: 30px;
+	text-align: center;
+	font-size: 0.8em;
+	background-color: white;
+	color: #0e1539;
+	margin: 0 auto;
+	width: 70%;
+	height: 50vh;
+	overflow-y: scroll;
+}
+
+.paginator {
+	margin-top: 30px;
+}
+
+.page {
+	margin: 2px;
+	padding-left: 2px;
+	padding-right: 2px;
+	transition: all 200ms 0ms ease;
+}
+
+.page:hover {
+	background-color: aliceblue;
+}
+
+#adflex {
+	display: flex;
+	justify-content: space-around;
+}
+
+@media screen and (max-width: 812px) {
+	.ad-area {
+		width: 0px !important;
+		opacity: 0;
+	}
+}

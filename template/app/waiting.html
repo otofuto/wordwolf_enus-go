@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		
+		<script data-ad-client="ca-pub-3865676677739483" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>  
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Waiting for playmates</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/waiting/{{ .Hash }}">
+		<style>
+			.del{
+				display: none;
+				color: blue;
+				background-color: lightgray;
+				border-radius: 3px;
+				padding: 1px 3px;
+				cursor: pointer;
+			}
+
+			#roomUrl:before {
+				content: '部屋URL: ';
+			}
+
+			#roomUrl:empty:before {
+				content: '';
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div id="msg" style="margin: 10% 0;">
+			<p>Waiting for playmates</p>
+		</div>
+		<p>To leave a member, select the member's name and click "Exile".</p>
+		<sub>(If the screen does not switch even after all the members enter the room, please reload the page.)</sub>
+		<div id="waitmember">
+			Loading...
+		</div>
+		<div id="btn" class="button" tabindex="0">- people left.</div>
+		<p id="roomUrl" onclick="selectAndCopy(this)"></p>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			if("{{ .Hash }}".length != 10){
+				document.getElementById("msg").innerHTML = "This room is not exist.";
+			}
+
+			document.getElementById("roomUrl").innerText = (("https:" == document.location.protocol) ? "https://" : "http://") + window.location.host + "/{{ .Hash }}";
+
+			function selectAndCopy(elm){
+				window.getSelection().selectAllChildren(elm);
+				document.execCommand('copy');
+			}
+
+			if (sessionStorage.getItem('point') == null)
+				sessionStorage.setItem('point', 0);
+
+			window.onresize = () => {}
+
+			onload = () => {
+				hided = false;
+				memberCount = 0;
+
+				ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+				ws.onopen = (e) => {
+					let fdata = new FormData();
+					fdata.append("id", new URL(location).searchParams.get('id'));
+					fetch("/r/waiting/{{ .Hash }}", {
+						method: "POST",
+						body: fdata,
+					}).then(res => {
+						return res.json();
+					}).then(obj => {
+						if(obj.result_type == 0){
+							document.getElementById("waitmember").innerHTML = "";
+							for(let i = 0; i < Object.keys(obj.members).length; i++)
+								addMember(obj.members[i]);
+
+							if(memberCount == {{ .Room.PlayerCount }})
+								gameStart(true);
+							else{
+								document.getElementById("btn").innerHTML = ({{ .Room.PlayerCount }} - memberCount) + " people left";
+							}
+						} else{
+							console.log("Failed to fetch members list;");
+							console.log(obj);
+						}
+					});
+					if(sessionStorage.getItem('userPoint') == null){
+						ws.send(JSON.stringify({
+							'message': JSON.stringify({
+								'order': 'pleaseUserPoint'
+							})
+						}));
+					}
+				}
+
+				ws.onmessage = e => {
+					message(e);
+				}
+
+				ws.onclose = e => {
+					close();
+				}
+			};
+
+			function message(e){
+				let data = JSON.parse(e.data);
+				if (typeof data == 'string') data = JSON.parse(data);
+				if(typeof data.name != 'undefined'){
+					addMember(data);
+				} else if(typeof data.order != 'undefined'){
+					if(data.order == 'gameStart'){
+						location = '/play/{{ .Hash }}?id=' + new URL(location).searchParams.get('id') + '&startTime=' + data.startTime;
+					} else if(data.order == 'pleaseUserPoint' && sessionStorage.getItem('userPoint') != null){
+						ws.send(JSON.stringify({
+							'message': JSON.stringify({
+								'order': 'transUserPoint',
+								'userPoint': sessionStorage.getItem('userPoint')
+							})
+						}));
+					} else if(data.order == 'transUserPoint'){
+						if(sessionStorage.getItem('userPoint') == null){
+							sessionStorage.setItem('userPoint', data.userPoint);
+							let sup = JSON.parse(data.userPoint);
+							if (sup.find(s => s.name == localStorage.getItem('wf_myname')) != null){
+								sessionStorage.setItem('point', sup.find(s => s.name == localStorage.getItem('wf_myname')).point);
+							}
+						} else if(sessionStorage.getItem('userPoint') != data.userPoint){
+							let sup = JSON.parse(sessionStorage.getItem('userPoint'));
+							let mup = JSON.parse(data.userPoint);
+							mup.forEach(m => {
+								if(sup.find(s => s.name == m.name) == null){
+									sup.push(m);
+								} else{
+									sup.find(s => s.name == m.name).point = m.point;
+								}
+							});
+							sessionStorage.setItem('userPoint', JSON.stringify(sup));
+							if (sup.find(s => s.name == localStorage.getItem('wf_myname')) != null){
+								sessionStorage.setItem('point', sup.find(s => s.name == localStorage.getItem('wf_myname')).point);
+							}
+						}
+					}
+				} else{
+					try{
+						document.getElementById("mem" + data.id).remove();
+						if(memberCount > 0)
+							memberCount--;
+						if(data.id == new URL(location).searchParams.get('id')){
+							location = '/';
+						}
+					} catch(e){console.log(e);}
+				}
+				if(memberCount == {{ .Room.PlayerCount }})
+					gameStart(true);
+				else{
+					gameStart(false);
+				}
+			}
+
+			function close(){
+				console.log("接続が切断されました。");
+				ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+				ws.onmessage = (e) => {
+					message(e);
+				}
+				ws.onclose = (e) => {
+					close();
+				}
+			}
+
+			function addMember(data){
+				var mem = document.createElement("p");
+				mem.id = "mem" + data.id;
+				mem.style.cursor = "pointer";
+				mem.setAttribute("onmouseover", "dispDelbtn(" + data.id + ", true)");
+				mem.setAttribute("onmouseleave", "dispDelbtn(" + data.id + ", false)");
+				var memname = document.createElement("span");
+				memname.innerText = data.name + " entered this room.";
+				var delspan = document.createElement("span");
+				delspan.innerHTML = "Exile";
+				delspan.id = "del" + data.id;
+				delspan.setAttribute("class", "del");
+				delspan.setAttribute("onclick", "delMem(" + data.id + ")");
+				mem.appendChild(memname);
+				mem.appendChild(delspan);
+				document.getElementById("waitmember").appendChild(mem);
+				if(memberCount < {{ .Room.PlayerCount }})
+					memberCount++;
+			}
+
+			function dispDelbtn(id, ena){
+				document.getElementById("del" + id).style.display = (ena ? "inline-block" : "none");
+			}
+
+			function delMem(id){
+				var pass = prompt("Please enter your passcode to leave the member");
+				if(pass != ""){
+					var data = new FormData();
+					data.append("pass", pass);
+					data.append("id", id);
+					fetch('/r/delmember/{{ .Hash }}', {
+						method: "POST",
+						body: data,
+					}).then((res) => {
+						return res.json();
+					}).then((obj) => {
+						if(obj.result_type == 0){
+							document.getElementById("mem" + id).remove();
+							ws.send(JSON.stringify(
+							{
+								'id': id,
+								'url': '{{ .Hash }}'
+							}
+							));
+						} else if(obj.result_type == 1){
+							alert("The passcodes do not match");
+						}
+					});
+				}
+			}
+
+			function gameStart(b){
+				if (b && !hided) {
+					document.getElementById("msg").innerHTML = "Gathered!";
+					if (sessionStorage.getItem("masterRoom") == "{{ .Hash }}") {
+						document.getElementById("btn").innerHTML = "Game start!";
+						document.getElementById("btn").addEventListener('click', () => {
+							ws.send(JSON.stringify(
+								{'message': JSON.stringify({'order': 'gameStart', 'startTime': ~~(new Date() / 1000)})}
+							));
+							fetch('/r/odaireset/{{ .Hash }}', {
+								method: "POST",
+								body: new FormData(),
+							}).then((res) => {
+								return res.text();
+							}).then((text) => {
+								sessionStorage.setItem('odaireset', 'true');
+								console.log(text);
+							});
+						});
+					} else {
+						document.getElementById("btn").innerHTML = "Please wait";
+					}
+				} else {
+					document.getElementById("msg").innerHTML = "Waiting for playmates";
+					document.getElementById("btn").innerHTML = ({{ .Room.PlayerCount }} - memberCount) + " people left.";
+					document.getElementById("btn").setAttribute("onclick", "")
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>アフィリエイトタグ編集</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/html/">
+		<style>
+			#htmlarea {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-around;
+				width: 100%;
+				max-width: 1100px;
+				box-sizing: border-box;
+			}
+
+			#htmlarea > div {
+				display: inline-block;
+				width: 400px;
+				max-width: 95%;
+				position: relative;
+				margin: 20px 0;
+			}
+
+			#htmlarea > div:last-child {
+				width: 100%;
+				display: none;
+			}
+
+			#htmlarea button {
+				display: inline-block;
+				position: relative;
+				border: none;
+				border-radius: 8px;
+				margin: 10px;
+				padding: 5px 10px;
+				background-color: white;
+				width: max-content;
+				font-size: 22px;
+				z-index: 1;
+			}
+
+			#htmlarea button:hover {
+				box-shadow: 0 0 3px 0 dimgray inset;
+				font-weight: bold;
+			}
+
+			#htmlarea > div > label {
+				display: inline-block;
+				position: absolute;
+				top: -22px;
+				left: 0;
+				width: 40px;
+				padding: 3px 10px;
+				box-sizing: border-box;
+				color: black;
+				background-color: white;
+				z-index: 2;
+				border: none;
+				border-radius: 3px;
+				font-weight: bold;
+				transition: all 250ms 0ms ease;
+			}
+
+			#htmlarea > div:focus-within > label {
+				width: 100%;
+				color: blue;
+			}
+
+			#htmlarea textarea {
+				display: inline-block;
+				position: relative;
+				width: 100%;
+				height: 100px;
+				padding: 10px;
+				box-sizing: border-box;
+				border-radius: 3px;
+				border: none;
+				outline: none;
+			}
+
+			#htmlarea textarea:before {
+				content: '方向';
+			}
+
+			.edit {
+				position: absolute;
+				width: 100% !important;
+				max-width: 100% !important;
+				height: 100%;
+				top: 0;
+				left: 0;
+				background-color: rgba(0, 0, 0, 0.6);
+				z-index: 9999;
+				padding: 20px 0;
+				overflow: auto;
+			}
+
+			#content {
+				width: 50vw;
+			}
+
+			@media (max-width: 812px) {
+				#content {
+					width: 100vw;
+				}
+			}
+
+			article {
+				display: flex;
+				flex-wrap: nowrap;
+				justify-content: space-between;
+				position: relative;
+				width: 100%;
+				margin: 10px 0;
+				overflow: hidden;
+				transition: all 180ms 0ms ease;
+			}
+
+			article:before {
+				content: '';
+				display: block;
+				position: absolute;
+				top: 100%;
+				left: 0;
+				background-color: white;
+				box-shadow: 0 0 8px gray inset;
+				width: 100%;
+				height: 100%;
+				border-radius: 8px 8px 0 0;
+				transition: all 180ms 0ms ease;
+			}
+
+			article:hover {
+				color: black;
+			}
+
+			article:hover:before {
+				top: 0;
+			}
+
+			article label {
+				display: block;
+				width: calc(100% - 50px);
+				text-align: left;
+				z-index: 1;
+			}
+
+			article input {
+				width: auto;
+			}
+
+			article span {
+				width: max-content;
+			}
+
+			article button {
+				display: block;
+				position: relative;
+				border: none;
+				border-radius: 8px;
+				padding: 5px 10px;
+				background-color: white;
+				width: max-content;
+				z-index: 1;
+			}
+
+			article button:hover {
+				box-shadow: 0 0 3px 0 dimgray inset;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>アフィリエイトタグ編集</h1>
+		</div>
+		<div id="htmlarea">
+			<div>
+				<label>左</label>
+				<textarea id="left_html" placeholder="左"></textarea>
+			</div>
+			<div>
+				<label>右</label>
+				<textarea id="right_html" placeholder="右"></textarea>
+			</div>
+			<div>
+				<label>上</label>
+				<textarea id="top_html" placeholder="上"></textarea>
+			</div>
+			<div>
+				<label>下</label>
+				<textarea id="bottom_html" placeholder="下"></textarea>
+			</div>
+			<div>
+				<button onclick="cancel()">キャンセル</button>
+				<button id="btnChange">変更する</button>
+			</div>
+		</div>
+		<div id="adflex">
+			<main class="ad-area"></main>
+			<main id="content">
+				<form method="put" name="fm" onsubmit="return false;">
+					<div id="pagelist">
+						{{ range .Pages }}
+						<article>
+							<label>
+								<input type="checkbox" name="chk" value="{{ .PagePath }}">
+								<span>{{ .PageName }}</span>
+							</label>
+							<button onclick="edit('{{ .PagePath }}')">編集</button>
+						</article>
+						{{ end }}
+					</div>
+					<div>
+						<button class="button" onclick="suball()">一括で設定</button>
+					</div>
+				</form>
+			</main>
+			<main class="ad-area"></main>
+		</div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			onload = () => {};
+			window.onresize = () => {};
+
+			function sub(page_path, b) {
+				let data = new FormData(document.fm);
+				data.append('page_path', page_path);
+				data.append('left_html', document.getElementById('left_html').value);
+				data.append('right_html', document.getElementById('right_html').value);
+				data.append('top_html', document.getElementById('top_html').value);
+				data.append('bottom_html', document.getElementById('bottom_html').value);
+				fetch('/r/html', {
+					method: 'POST',
+					body: data,
+				}).then(res => res.json())
+				.then(result => {
+					if (result.result_type == 0) {
+						if (b) {
+							alert('設定しました。');
+							cancel();
+						}
+					} else {
+						alert('失敗しました。(' + page_path + ')');
+					}
+				}).catch(err => {
+					console.error(err);
+					alert('失敗しました。(' + page_path + ')');
+				});
+			}
+
+			function suball() {
+				Array.from(document.querySelectorAll('[name="chk"]')).filter(chk => chk.checked)
+				.forEach(chk => sub(chk.value, false));
+				alert('完了しました');
+			}
+
+			function edit(page_path) {
+				document.getElementById('htmlarea').setAttribute('class', 'edit');
+				document.querySelector('#htmlarea > div:last-child').style.display = 'block';
+				document.getElementById('btnChange').setAttribute('onclick', "sub('" + page_path + "', true)");
+				fetch('/r/html?page_path=' + page_path)
+				.then(res => res.json())
+				.then(res => {
+					document.getElementById('left_html').value = res.ph.left_html;
+					document.getElementById('right_html').value = res.ph.right_html;
+					document.getElementById('top_html').value = res.ph.top_html;
+					document.getElementById('bottom_html').value = res.ph.bottom_html;
+				}).catch(err => {
+					console.error(err);
+					alert('取得に失敗しました。');
+				});
+			}
+
+			function cancel() {
+				document.getElementById('htmlarea').removeAttribute('class');
+				document.querySelector('#htmlarea > div:last-child').style.display = 'none';
+				document.getElementById('btnChange').removeAttribute('onclick');
+				document.getElementById('left_html').value = '';
+				document.getElementById('right_html').value = '';
+				document.getElementById('top_html').value = '';
+				document.getElementById('bottom_html').value = '';
+			}
+		</script>
+	</body>
+</html>

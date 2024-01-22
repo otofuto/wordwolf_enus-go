@@ -1,0 +1,17 @@
+{
+  "name":"どこでもワードウルフ",
+  "short_name":"どこでもワードウルフ",
+  "icons": [{
+      "src": "img/pwaicon_192.png",
+      "sizes":"192x192",
+      "type": "image/png"
+    }, {
+      "src": "img/pwaicon_512.png",
+      "sizes":"512x512",
+      "type": "image/png"
+    }],
+  "start_url": "/?utm_source=homescreen",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF"
+}

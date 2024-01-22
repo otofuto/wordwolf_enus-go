@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>ブログ一覧</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/categorylist">
+		<style>
+			body {
+				padding: 0 10%;
+			}
+
+			table {
+				border: solid 2px #ea9999;
+				background-color: white;
+				color: #0e1539;
+				width: 100%;
+				border-radius: 5px;
+			}
+
+			th {
+				border-bottom: solid 1px #0e1539;
+				border-left: solid 1px #0e1539;
+				border-radius: 3px;
+
+			}
+
+			td {
+				border-bottom: solid 1px #0e1539;
+				border-left: solid 1px #0e1539;
+				border-radius: 3px;
+
+			}
+
+			.thumb {
+				width: 300px;
+			}
+
+			@media screen and (max-width: 812px) {
+				body {
+					padding: 0;
+				}
+
+				.thumb {
+					width: 30vw;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>ブログ一覧</h1>
+		</div>
+		<div>
+			<button class="button" style="width: 6em;" onclick="location = 'blog';">新規作成</button>
+		</div>
+		<table cellspacing="1">
+			<thead>
+				<tr>
+					<th style="width: 3em;">id</th>
+					<th class="thumb">画像</th>
+					<th>タイトル</th>
+					<th style="width: 3em;">編集</th>
+					<th style="width: 3em;">削除</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ range .BlogList }}
+				<tr>
+					<td>{{ .Id }}</td>
+					<td><img src="{{ .Image }}" class="thumb"></td>
+					<td>{{ .Title }}</td>
+					<td style="text-align: center;"><img src="/st/img/edit.webp" width="25px" onclick="location = 'blog?edit={{ .Id }}';"></td>
+					<td style="text-align: center;"><img src="/st/img/delete.webp" width="25px" onclick="deleteCate({{ .Id }})"></td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+		<div style="text-align: right;"><a href="/manage/">管理画面へ</a></div>
+		<script>
+			function deleteCate(id) {
+				if (confirm("ID: " + id + "を削除しますか？")) {
+					fetch('/r/blog/' + id, {
+						method: 'DELETE',
+						body: new FormData(),
+					}).then(res => {
+						return res.json();
+					}).then(obj => {
+						if (obj.result_type == 0) {
+							location.reload();
+						} else {
+							alert("削除に失敗しました。");
+						}
+					}).catch(err => {
+						console.error(err);
+						alert("削除に失敗しました。");
+					});
+				}
+			}
+		</script>
+	</body>
+</html>

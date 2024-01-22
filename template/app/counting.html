@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Aggregating</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/counting/{{ .Hash }}">
+		<style>
+			.msg{
+				margin: 40vh auto;
+				font-size: 1.4em;
+				padding: 10px 0;
+				border: solid 2px #ea9999;
+				border-radius: 10px;
+				width: 76%;
+				text-align: center;
+				background-color: white;
+				color: #0e1539;
+			}
+
+			#waitmember{
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div id="count" class="msg">
+			<p>Now aggregating</p>
+			<sub>(If the screen doesn't switch after everyone has voted, reload the page.)</sub>
+		</div>
+		<div style="margin: 10% 0;">&nbsp;
+		</div>
+		<div id="waitmember" style="display: none;">
+		</div>
+		<div id="btn" class="button" tabindex="0" style="display: none;">See answer</div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			window.onresize = () => {}
+			if("{{ .Hash }}".length != 10)
+				document.getElementById("count").innerHTML = "This room is not exist.";
+			voted = 0;
+
+			fetch('/r/vote/{{ .Hash }}').then(res => {
+				return res.json();
+			}).then(res => {
+				if (res.result_type == 1) {
+					endCount();
+				}
+			});
+
+			function endCount(){
+				fetch('/r/voteresult/{{ .Hash }}', {
+					method: "POST",
+					body: new FormData(),
+				}).then(res => {
+					return res.json();
+				}).then(obj => {
+					if(obj.result_type == 0){
+						document.getElementById("waitmember").innerHTML = "";
+						for(let i = 0; i < Object.keys(obj.vote).length; i++){
+							var p = document.createElement("p");
+							if (obj.vote[i].votecount > 1)
+								p.innerHTML = obj.vote[i].name + " won " + obj.vote[i].votecount + " votes.";
+							else if (obj.vote[i].votecount == 1)
+								p.innerHTML = obj.vote[i].name + " won a vote.";
+							else if (obj.vote[i].votecount == 0)
+								p.innerHTML = obj.vote[i].name + " was not voted.";
+							document.getElementById("waitmember").appendChild(p);
+							document.title = "Result";
+						}
+						fetch('/r/announceresult/{{ .Hash }}', {
+							method: "POST",
+							body: new FormData(),
+						}).then((res) => {
+							return res.json();
+						}).then(obj2 => {
+							if(obj2.result_type == 0){
+								wordA = { 'odai': null, 'count': 0 };
+								wordB = { 'odai': null, 'count': 0 };
+								let voteMax = 0;
+								for(let i = 0; i < Object.keys(obj2.announce).length; i++){
+									obj2.announce[i].votecount = obj.vote.find(v => v.id == obj2.announce[i].id).votecount;
+
+									if(wordA.odai == null) wordA.odai = obj2.announce[i].odai;
+									else if(wordB.odai == null && wordA.odai != obj2.announce[i].odai) wordB.odai = obj2.announce[i].odai;
+									if(obj2.announce[i].odai == wordA.odai) wordA.count++;
+									else if(obj2.announce[i].odai == wordB.odai) wordB.count++;
+
+									if (voteMax < obj2.announce[i].votecount) voteMax = obj2.announce[i].votecount;
+								}
+								//少数派(ワードウルフ)のお題を決定
+								wordwolf = wordA.odai;
+								if(wordA.count > wordB.count) wordwolf = wordB.odai;
+								//一番票が多いのは誰か
+								maxVoteUsers = Array.from(obj2.announce).filter(a => a.votecount == voteMax);
+								//全員がワードウルフか
+								let allWodwolf = true;
+								for(let i = 0; i < maxVoteUsers.length; i++){
+									if(maxVoteUsers[i].odai != wordwolf){
+										allWodwolf = false;
+										break;
+									}
+								}
+								let me = Array.from(obj2.announce).find(a => a.id == parseInt(new URL(location).searchParams.get('id')));
+								if(allWodwolf){
+									obj2.winner = 'other';
+									//自分が勝ちかどうか判定
+									if (me.odai != wordwolf && sessionStorage.getItem('added') == null){
+										let point = parseInt(sessionStorage.getItem('point')) + 1;
+										sessionStorage.setItem('point', point);
+										sessionStorage.setItem('added', true);
+										ws.send(JSON.stringify({
+											'message': JSON.stringify({
+												'name': me.name,
+												'point': point
+											})
+										}));
+									}
+								} else{
+									obj2.winner = 'wordwolf';
+									//自分が勝ちかどうか判定
+									if (me.odai == wordwolf && sessionStorage.getItem('added') == null){
+										let point = parseInt(sessionStorage.getItem('point')) + 1;
+										sessionStorage.setItem('point', point);
+										sessionStorage.setItem('added', true);
+										ws.send(JSON.stringify({
+											'message': JSON.stringify({
+												'name': me.name,
+												'point': point
+											})
+										}));
+									}
+								}
+								sessionStorage.setItem("announce", JSON.stringify(obj2));
+								document.getElementById("count").remove();
+								document.getElementById("waitmember").style.display = "block";
+								document.getElementById("btn").style.display = "block";
+								document.getElementById("btn").setAttribute("onclick",
+									"location = '/announce/{{ .Hash }}?id=" + new URL(location).searchParams.get('id') + "';");
+							} else{
+								alert("Failed to fetch answers from server.");
+							}
+						});
+					}
+				});
+			}
+
+			var ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+			ws.onopen = (e) => {
+				ws.send(JSON.stringify(
+				{
+					'name': '',
+					'url': '{{ .Hash }}',
+					'id': new URL(location).searchParams.get('id')
+				}
+				));
+				var data = new FormData();
+				data.append("count", "");
+				fetch("/r/counting/{{ .Hash }}", {
+					method: "POST",
+					body: data,
+				}).then((res) => {
+					return res.json();
+				}).then((obj) => {
+					if(obj.result_type == 0){
+						voted = obj.voted;
+						if(voted >= {{ .PlayerCount }}){
+							endCount();
+						} else if(voted == 0){
+							alert("ERROR\n\nLost the player's information.\nCan not continue.");
+						}
+					} else{
+						alert("Failed to fetch a data.\nPlease reload this page.");
+					}
+				});
+			}
+
+			ws.onmessage = (e) => {
+				message(e);
+			}
+
+			function message(e){
+				let data = JSON.parse(e.data);
+				if (typeof data == 'string') data = JSON.parse(data);
+				if (typeof data.id != 'undefined') {
+					voted++;
+					if (voted >= {{ .PlayerCount }}) {
+						endCount();
+					}
+				} else if(typeof data.point != 'undefined') {
+					let userPoint = sessionStorage.getItem('userPoint');
+					if (userPoint == null) {
+						userPoint = [];
+					} else {
+						userPoint = JSON.parse(userPoint);
+					}
+					if (userPoint.find(up => up.name == data.name) != null){
+						userPoint.find(up => up.name == data.name).point = data.point;
+					} else {
+						userPoint.push({ 'name': data.name, 'point': data.point });
+					}
+					sessionStorage.setItem('userPoint', JSON.stringify(userPoint));
+				}
+			}
+
+			ws.onclose = (e) => {
+				close();
+			}
+
+			function close(){
+				console.log("接続が切断されました。");
+				ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+				ws.onmessage = (e) => {
+					message(e);
+				}
+				ws.onclose = (e) => {
+					close();
+				}
+			}
+		</script>
+	</body>
+</html>

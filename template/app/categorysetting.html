@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<title>カテゴリJSON登録</title>
+		<style>
+			textarea{
+				width: 500px;
+				height: 300px;
+			}
+		</style>
+	</head>
+	<body>
+		<p>件数が多すぎるとタイムアウトになると思います。</p>
+		<textarea id="text"></textarea><br>
+		<input type="button" onclick="get()" value="現在の内容でJSONを取得する">
+		<input type="button" onclick="set()" value="JSONから登録する"><br>
+		<textarea id="log" readonly></textarea>
+		<script>
+			function get(){
+				fetch("/r/categorysetting", {
+					method: "GET",
+				}).then((res) => {
+					return res.text();
+				}).then((text) => {
+					document.getElementById("text").value = text;
+				});
+			}
+
+			function set(){
+				var data = new FormData();
+				data.append("json", document.getElementById("text").value);
+				fetch("/r/categorysetting", {
+					method: "POST",
+					body: data,
+				}).then((res) => {
+					return res.text();
+				}).then((text) => {
+					document.getElementById("log").value = text;
+				})
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>問題{{ .Mode }}</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/question">
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>問題{{ .Mode }}</h1>
+		</div>
+		<form method="post" name="fm" onsubmit="return false;">
+			<div>
+				<h3>カテゴリ選択</h3>
+			</div>
+			<select name="category">
+				{{ range .CategoryList }}
+				<option value="{{ .Id }}">{{ .Name }}</option>
+				{{ end }}
+			</select>
+			<div>
+				<h3>問題記入</h3>
+			</div>
+			<input type="text" name="val1" autocomplete="off" maxlength="50" value="{{ .Question.Val1 }}" required>
+			<div>と</div>
+			<input type="text" name="val2" autocomplete="off" maxlength="50" value="{{ .Question.Val2 }}" required>
+			{{ if eq .Mode "編集" }}
+			<input type="hidden" name="id" value="">
+			{{ end }}
+			<button onclick="sub()" class="button" tabindex="0">保存</button>
+		</form>
+		<div style="text-align: right;"><a href="/manage/">管理画面へ</a></div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script src="/st/js/master.js?{{ .Query }}"></script>
+		<script>
+			function sub(){
+				if(!confirm("入稿しますか？")) return;
+				let data = new FormData(document.fm);
+				formDisabled(document.fm, true);
+				post('/r/question', data).then(res => {
+					if (res.result_type == 0) {
+						alert("問題を入稿しました。");
+						location = '/manage/questionlist';
+					} else if (result_type == 1) {
+						alert('更新しました。');
+						location = '/manage/questionlist';
+					} else {
+						alert(res.message);
+					}
+				}).catch(err => {
+					console.error(err);
+					alert('処理に失敗しました');
+				}).finally(() => {
+					formDisabled(document.fm, false);
+				});
+			}
+		</script>
+		{{ if eq .Mode "編集" }}
+		<script>
+			document.getElementsByName("id")[0].value = new URL(location).searchParams.get('edit');
+			document.fm.category.value = {{ .Category }};
+		</script>
+		{{ end }}
+	</body>
+</html>

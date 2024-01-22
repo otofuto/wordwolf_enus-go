@@ -1,0 +1,4 @@
+User-Agent:*
+Disallow:
+ 
+Sitemap:https://www.wordwolf.tokyo/sitemap.xml

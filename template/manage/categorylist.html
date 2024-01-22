@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>カテゴリ一覧</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/categorylist">
+		<style>
+			table{
+				border: solid 2px #ea9999;
+				background-color: white;
+				color: #0e1539;
+				width: 100%;
+				border-radius: 5px;
+			}
+
+			td{
+				border-bottom: solid 1px #0e1539;
+				border-left: solid 1px #0e1539;
+				border-radius: 3px;
+
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>カテゴリ一覧</h1>
+		</div>
+		<table cellspacing="1">
+			<tr>
+				<td>id</td>
+				<td>name</td>
+				<td>編集</td>
+				<td>削除</td>
+			</tr>
+			{{ range .CategoryList }}
+			<tr>
+				<td>{{ .Id }}</td>
+				<td>{{ .Name }}</td>
+				<td style="text-align: center;"><img src="/st/img/edit.webp" width="25px" onclick="location = 'category?edit={{ .Id }}';"></td>
+				<td style="text-align: center;"><img src="/st/img/delete.webp" width="25px" onclick="deleteCate({{ .Id }})"></td>
+			</tr>
+			{{ end }}
+		</table>
+		<div style="text-align: right;"><a href="/manage/">管理画面へ</a></div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			function deleteCate(id){
+				if(confirm("ID: " + id + "を削除しますか？")){
+					fetch('/r/category/' + id, {
+						method: 'DELETE',
+						body: new FormData(),
+					}).then((res) => {
+						return res.json();
+					}).then((obj) => {
+						if(obj.result_type == 0){
+							location.reload();
+						}else{
+							alert("削除に失敗しました。");
+						}
+					});
+				}
+			}
+		</script>
+	</body>
+</html>

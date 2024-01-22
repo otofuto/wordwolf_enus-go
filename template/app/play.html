@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Enjoy Word Wolf | Completely free and no risk of personal information leakage.There's nothing complicated, just share the URL with the participants!</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/play/{{ .Hash }}">
+		<style>
+			#waitmember{
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div id="waitmember" style="margin-top: 25%;">
+			<div style="height: 30%"></div>
+			<p>Your theme is</p>
+			<p style="font-size: 2em;">{{ .Odai }}</p>
+			<p>* Please do not reload the page</p>
+		</div>
+		<div class="timer" id="time" tabindex="0"></div>
+		<div id="reset" style="display: none;">
+			<a href="/setting" onclick="reset()">Start over</a>
+		</div>
+		<video src="/st/img/antisleep.mp4" style="opacity: 0;" loop autoplay muted></video>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			window.onresize = () => {}
+			onload = () => {
+				if(sessionStorage['masterRoom'] == '{{ .Hash }}'){
+					document.getElementById("reset").style.display = "block";
+				}
+
+				var timerSec = {{ .Sec }};
+				if(timerSec == 0) return;
+				let startTime = parseInt(new URL(location).searchParams.get('startTime'));
+				var time = document.getElementById("time");
+				time.innerHTML = frontZero((timerSec / 60) | 0) + ":" + frontZero(timerSec % 60);
+				var si = setInterval(() => {
+					let currentTime = new Date().getTime() / 1000;
+					let sec = timerSec - Math.floor(currentTime - startTime);
+					time.innerHTML = frontZero((sec / 60) | 0) + ":" + frontZero(sec % 60);
+					if(sec <= 0){
+						clearInterval(si);
+						time.innerHTML = "Vote";
+						time.setAttribute("class", "button");
+						time.setAttribute("onclick", "location = '/vote/{{ .Hash }}?id=" + new URL(location).searchParams.get('id') + "';");
+					}
+				}, 1000);
+			}
+
+			sessionStorage.removeItem('added');
+
+			ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+			ws.onmessage = e => {
+				if(sessionStorage['masterRoom'] != '{{ .Hash }}'){
+					let data = JSON.parse(e.data);
+					if(data.name == "#room_reset"){
+						location = "/";
+					}
+				}
+			}
+
+			ws.onopen = e => {
+				ws.send(JSON.stringify(
+				{
+					'message': JSON.stringify({
+						'order': 'gameStart',
+						'startTime': new URL(location).searchParams.get('startTime')
+					})
+				}));
+			}
+
+			function reset(){
+				ws.send(JSON.stringify(
+				{
+					'name': '#room_reset',
+					'id': new URL(location).searchParams.get('id'),
+					'url': '{{ .Hash }}'
+				}
+				));
+			}
+
+			function frontZero(num){
+				if(num < 10) return "0" + num;
+				return num;
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,6 @@
+documents
+
+.env
+*.exe
+.DS_Store
+*.sql

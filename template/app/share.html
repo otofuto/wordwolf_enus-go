@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Share URL</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/share">
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div style="margin-top: 20%;">
+			<h3>Share the URL</h3>
+			Share the URL with the participants and press "Next".
+		</div>
+		<div class="count_div" id="url" style="padding: 30px 0; margin-bottom: 10%;" onclick="selectAndCopy(this)"></div>
+		<p>Recruiting playmates on Twitter<a class="twitter-share-button" data-size="large">Tweet</a></p>
+		<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+		<p>* Please do not reload the page as the shared URL will change when you reload the page.</p>
+		<div class="button" tabindex="0" onclick="location = 'waiting/{{ .Hash }}?id={{ .MyId }}'">次へ<br><span style="font-size: 0.7em;">This completes the settings!</span></div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			onload = () => {}
+			window.onresize = () => {}
+			var url = (("https:" == document.location.protocol) ? "https://" : "http://") + window.location.host + "/{{ .Hash }}";
+			document.getElementById("url").innerText = url;
+			document.querySelector(".twitter-share-button").setAttribute("data-url", url);
+			var tweetText = "{{ .UserName }} is looking for a wordwolf playmate.";
+			document.querySelector(".twitter-share-button").setAttribute("href", "https://twitter.com/intent/tweet?text=" + encodeURI(tweetText));
+			sessionStorage.setItem("masterRoom", "{{ .Hash }}");
+			function selectAndCopy(elm){
+				window.getSelection().selectAllChildren(elm);
+				document.execCommand('copy');
+			}
+
+			wsconnect();
+
+			function wsconnect(){
+				ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+				ws.onopen = e => {
+					//
+				}
+
+				ws.onclose = e => {
+					wsconnect();
+				}
+
+				ws.onmessage = e => {
+					let data = JSON.parse(e.data);
+					if (typeof data == 'string') data = JSON.parse(data);
+					if(typeof data.order != 'undefined'){
+						if(data.order == 'pleaseUserPoint' && sessionStorage.getItem('userPoint') != null){
+							ws.send(JSON.stringify({
+								'message': JSON.stringify({
+									'order': 'transUserPoint',
+									'userPoint': sessionStorage.getItem('userPoint')
+								})
+							}));
+						} else if(data.order == 'transUserPoint'){
+							if(sessionStorage.getItem('userPoint') == null){
+								sessionStorage.setItem('userPoint', data.userPoint);
+							} else if(sessionStorage.getItem('userPoint') != data.userPoint){
+								let sup = JSON.parse(sessionStorage.getItem('userPoint'));
+								let mup = JSON.parse(data.userPoint);
+								mup.forEach(m => {
+									if(sup.find(s => s.name == m.name) == null){
+										sup.push(m);
+									} else{
+										sup.find(s => s.name == m.name).point = m.point;
+									}
+								});
+								sessionStorage.setItem('userPoint', JSON.stringify(sup));
+							}
+						}
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

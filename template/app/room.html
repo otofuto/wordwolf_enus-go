@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <meta property="og:title" content="{{ .RoomnameOg }}" />
+		<meta property="og:type" content="blog" />
+		<meta property="og:description" content="URLを押すだけでワードウルフが遊べます" />
+		<meta property="og:url" content="https://www.wordwolf.tokyo/{{ .Hash }}" />
+		<meta property="og:image" content="{{ .Host }}/st/img/dokodemowordwolf_large.webp" />
+		<meta property="og:site_name" content="Enjoy Word Wolf" />
+		<meta property="og:locale" content="ja_JP" />
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:site" content="@[eww_2020]">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Enjoy Word Wolf | Completely free and no risk of personal information leakage.There's nothing complicated, just share the URL with the participants!</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico'">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/{{ .Hash }}">
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>Enjoy Word Wolf</h1>
+			<p>Room name：{{ .RoomName }}</p>
+		</div>
+		<div>
+			<h3 id="msg">名前を入力</h3>
+		</div>
+		<input type="text" id="name" maxlength="50" placeholder="wolf boy" style="display: none;">
+		<div onclick="enterRoom()" class="button" tabindex="0" id="btn" style="display: none;">Enter the room</div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script>
+			onload = () => {}
+			window.onresize = () => {}
+
+			if ("{{ .Hash }}".length == 0) {
+				msg.innerText = "This room is not exist.";
+			} else {
+				document.getElementById("name").removeAttribute("style");
+
+				if (localStorage.getItem('wf_myname') != null) {
+					document.getElementById("name").value = localStorage.getItem('wf_myname');
+				}
+
+				var ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+				ws.onopen = e => {
+					document.getElementById("btn").style.display = "block";
+				}
+
+				ws.onmessage = e => {
+					data = JSON.parse(e.data);
+					if (data.name != undefined) {
+						if (data.name == document.getElementById("name").value) {
+							localStorage.setItem('wf_myname', document.getElementById("name").value);
+							location = 'waiting/{{ .Hash }}?id=' + data.id;
+						}
+					}
+				}
+			}
+
+			function enterRoom(){
+				if(document.getElementById("name").value != "" && "{{ .Hash }}".length == 10){
+					var data = new FormData();
+					data.append("name", document.getElementById("name").value);
+					data.append("url", "{{ .Hash }}");
+					fetch('/r/addmember', {
+						method: 'POST',
+						body: data,
+					}).then((res) => {
+						return res.json();
+					}).then((obj) => {
+						if(obj.result_type == 0){
+							ws.send(JSON.stringify(
+							{
+								'name': document.getElementById("name").value,
+								'id': obj.message-0,
+								'url': '{{ .Hash }}'
+							}
+							));
+						}
+						else if(obj.result_type == 1){
+							alert('Room is alraedy filled.');
+						}
+						else if(obj.result_type == 2){
+							alert('The name is already used by other.');
+						}
+						else alert('Failed to connect server.');
+					});
+				}else{
+					alert("Input your name.");
+				}
+			}
+		</script>
+		<script type="text/javascript">
+			amzn_assoc_ad_type = "link_enhancement_widget";
+			amzn_assoc_tracking_id = "wordwolf03-22";
+			amzn_assoc_linkid = "c0155b1b9526bccedd8d4e1e42d364ad";
+			amzn_assoc_placement = "";
+			amzn_assoc_marketplace = "amazon";
+			amzn_assoc_region = "JP";
+		</script>
+		<script src="//ws-fe.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&Operation=GetScript&ID=OneJS&WS=1&MarketPlace=JP"></script>
+	</body>
+</html>

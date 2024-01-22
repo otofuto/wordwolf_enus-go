@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-M8DVS5JJ');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<meta name="propeller" content="95a86aecb8a626881d863dcfcbe72e55">
+		<title>Make room</title>
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="stylesheet" href="/st/css/master.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/offsetting">
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M8DVS5JJ"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<form name="fm">
+			<div>
+				<h3>Number of players</h3>
+				Set the number of players.
+			</div>
+			<span id="error_playercount" style="display: none; color: red;">Please set with 3 or more.</span>
+			<div class="count_div">
+				<input type="number" name="playercount" class="count" placeholder="5" min="3" required><span style="font-size: 1.4em;">名</span>
+			</div>
+			<div>
+				<h3>Number of wordwolf</h3>
+			</div>
+			<span id="error_wordwolfcount" style="display: none; color: red;">Please set with 1 or more.</span>
+			<div class="count_div">
+				<input type="number" name="wordwolfcount" class="count" placeholder="1" min="1" required><span style="font-size: 1.4em;">people</span>
+			</div>
+			<div>
+				<h3>Talk theme</h3>
+			</div>
+			<select name="talkcategory">
+				{{ range .CategoryList }}
+				<option value="{{ .Id }}">{{ .Name }}</option>
+				{{ end }}
+			</select>
+			<div>
+				<h3>Time of discussion</h3>
+				Set the time by "min : sec"
+			</div>
+			<div class="count_div">
+				<input type="number" name="talktime_min" class="time" placeholder="03" min="0" max="59" id="talktime_min" required onchange="checkValueSpan(this)"><span style="font-size: 1.4em;">:</span>
+				<input type="number" name="talktime_sec" class="time" placeholder="00" min="0" max="59" id="talktime_sec" required onchange="checkValueSpan(this)">
+			</div>
+			<input type="time" name="talktime" step="1" value="00:03:00" style="display: none;">
+			<div class="button" tabindex="0" onclick="roommake_next()">次へ</div>
+		</form>
+		<script src="/st/js/scripts_off.js"></script>
+		<script>
+			onload = () => {}
+			window.onresize = () => {}
+
+			var opt = document.getElementsByTagName("option");
+			for(let i = 0; i < opt.length; i++){
+				if(opt[i].value == 6) opt[i].setAttribute("selected", "true");
+			}
+		</script>
+	</body>
+</html>

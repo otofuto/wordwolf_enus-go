@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+		new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+		j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+		'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-PXGSVRC');</script>
+		<!-- End Google Tag Manager -->
+		<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+		<title>ブログ{{ .Mode }}</title>
+		<link rel="stylesheet" href="/st/wysihtml5/bootstrap.min.css">
+		<link rel="stylesheet" href="/st/wysihtml5/prettify.css">
+		<link rel="stylesheet" href="/st/wysihtml5/bootstrap-wysihtml5.css">
+		<link rel="stylesheet" href="/st/css/styles.css?{{ .Query }}">
+		<link rel="shortcut icon" href="/st/img/favicon.ico">
+		<link rel="canonical" href="https://www.wordwolf.tokyo/manage/category">
+		<script src="/st/wysihtml5/wysihtml5-0.3.0.js"></script>
+		<script src="/st/wysihtml5/jquery-1.7.2.min.js"></script>
+		<script src="/st/wysihtml5/prettify.js"></script>
+		<script src="/st/wysihtml5/bootstrap.min.js"></script>
+		<script src="/st/wysihtml5/bootstrap-wysihtml5.js"></script>
+		<style>
+			body {
+				padding: 0 25%;
+			}
+
+			.input-box {
+				width: 50%;
+				display: block;
+				margin: 1em auto;
+			}
+
+			@media screen and (max-width: 812px) {
+				body {
+					padding: 0;
+				}
+
+				.input-box {
+					width: 100%;
+				}
+			}
+
+			.input-box input {
+				text-align: left;
+				margin: 0;
+				font-size: 17px;
+			}
+
+			.textarea {
+				width: 100%;
+				color: black;
+				padding: 5px;
+				min-height: 300px;
+				font-size: 17px;
+			}
+
+			.wysihtml5-sandbox {
+				min-height: 300px;
+				width: calc(100% - 10px) !important;
+			}
+
+			.wysihtml5-toolbar {
+				display: flex;
+				font-family: 'Noto Serif JP', serif;
+			}
+
+			ul {
+				list-style: none;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PXGSVRC"
+		height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
+		<div>
+			<h1>ブログ{{ .Mode }}</h1>
+		</div>
+		<form method="post" name="fm" onsubmit="return false;">
+			<p class="input-box">サムネイル画像URL</p>
+			<p class="input-box"><input type="url" name="image" value="{{ .Blog.Image }}" id="imageurl" onchange="viewThumb()"></p>
+			<div class="input-box">
+				<img id="thumbImg" style="width: 100%">
+			</div>
+			<p class="input-box">タイトル</p>
+			<p class="input-box"><input type="text" name="title" autocomplete="off" maxlength="255" value="{{ .Blog.Title }}" required></p>
+			<textarea name="content" class="textarea" id="blogContent" required>{{ .Blog.Content }}</textarea>
+			{{ if eq .Mode "編集" }}
+			<input type="hidden" name="id" value="{{ .Blog.Id }}">
+			{{ end }}
+			<div onclick="create()" class="button" style="width: 50%;" tabindex="0">保存</div>
+		</form>
+		<div style="text-align: right;"><a href="/manage/">管理画面へ</a></div>
+		<script src="/st/js/scripts.js?{{ .Query }}"></script>
+		<script src="/st/js/master.js?{{ .Query }}"></script>
+		<script>
+			$('.textarea').wysihtml5({
+				"emphasis": true,
+				"html": true,
+				"image": true
+			});
+
+			onload = () => {}
+			window.onresize = () => {}
+
+			function sub() {
+				document.getElementById("submit").click();
+			}
+
+			function create() {
+				if(!confirm("保存しますか？")) return;
+				let data = new FormData(document.fm);
+				formDisabled(document.fm, true);
+				post('/r/blog', data).then(res => {
+					if (res.result_type == 0) {
+						alert("ブログを作成しました。");
+						location = '/manage/bloglist';
+					} else if (res.result_type == 1) {
+						alert('更新しました。');
+						location = '/manage/bloglist';
+					} else {
+						alert(res.message);
+					}
+				}).catch(err => {
+					console.error(err);
+					alert('処理に失敗しました');
+				}).finally(() => {
+					formDisabled(document.fm, false);
+				});
+			}
+
+			viewThumb();
+
+			function viewThumb() {
+				thumbImg.src = imageurl.value;
+			}
+		</script>
+	</body>
+</html>
