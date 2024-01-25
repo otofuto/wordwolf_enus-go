@@ -141,13 +141,13 @@ func CheckRequest(w http.ResponseWriter, r *http.Request) bool {
 			}
 		}
 	}
-	blockedIp := []string{"54.", "34.", "66.", "61.147.", "138.", "17.", "110."}
+	/*blockedIp := []string{"54.", "34.", "66.", "61.147.", "138.", "17.", "110."}
 	for _, bi := range blockedIp {
 		if strings.HasPrefix(xForwardedFor, bi) {
 			http.Error(w, "だめ", 400)
 			return false
 		}
-	}
+	}*/
 	return true
 }
 
