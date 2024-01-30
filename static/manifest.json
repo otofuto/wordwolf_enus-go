@@ -1,6 +1,6 @@
 {
-  "name":"どこでもワードウルフ",
-  "short_name":"どこでもワードウルフ",
+  "name":"Enjoy Word Wolf",
+  "short_name":"Enjoy Word Wolf",
   "icons": [{
       "src": "img/pwaicon_192.png",
       "sizes":"192x192",
