@@ -180,7 +180,7 @@
 				}).then((obj) => {
 					if(obj.result_type == 0){
 						voted = obj.voted;
-						if(voted >= {{ .PlayerCount }}){
+						if(voted >= '{{ .PlayerCount }}' - 0){
 							endCount();
 						} else if(voted == 0){
 							alert("ERROR\n\nLost the player's information.\nCan not continue.");
@@ -200,7 +200,7 @@
 				if (typeof data == 'string') data = JSON.parse(data);
 				if (typeof data.id != 'undefined') {
 					voted++;
-					if (voted >= {{ .PlayerCount }}) {
+					if (voted >= '{{ .PlayerCount }}' - 0) {
 						endCount();
 					}
 				} else if(typeof data.point != 'undefined') {

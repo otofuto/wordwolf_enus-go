@@ -37,11 +37,21 @@
 		<script>
 			onload = () => {}
 			window.onresize = () => {}
-			var ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
 
-			ws.onopen = (e) => {
-				document.getElementById("btn").style.display = "block";
+			function connectWs() {
+				ws = new WebSocket(("https:" == document.location.protocol ? "wss://" : "ws://") + window.location.host + '/ws/{{ .Hash }}');
+
+				ws.onopen = () => {
+					document.getElementById("btn").style.display = "block";
+				};
+
+				ws.onclose = () => {
+					ws = connectWs();
+				};
+
+				return ws;
 			}
+			let ws = connectWs();
 
 			if("{{ .Hash }}".length != 10){
 				document.getElementById("msg").innerHTML = "You cannot vote.";
@@ -57,6 +67,11 @@
 					method: "POST",
 					body: data,
 				}).then((res) => {
+					ws.send(JSON.stringify({
+						'name': '',
+						'url': '{{ .Hash }}',
+						'id': new URL(location).searchParams.get('id')
+					}));
 					location = '/counting/{{ .Hash }}?id=' + new URL(location).searchParams.get('id');
 				});
 			}
