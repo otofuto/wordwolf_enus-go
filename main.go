@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -23,6 +25,8 @@ import (
 	"wordwolf_enus/pkg/room"
 	"wordwolf_enus/pkg/util"
 
+	"github.com/allegro/bigcache"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/acme/autocert"
@@ -31,6 +35,12 @@ import (
 var clients = make(map[*websocket.Conn]string)
 var broadcast = make(chan SocketMessage)
 var upgrader = websocket.Upgrader{}
+var cacheConfig = bigcache.Config{
+	Shards:      1024,
+	LifeWindow:  10 * time.Minute,
+	CleanWindow: 1 * time.Minute,
+}
+var cache, _ = bigcache.NewBigCache(cacheConfig)
 
 type SocketMessage struct {
 	RoomId  string
@@ -77,6 +87,15 @@ type ResultList struct {
 	ResultType int         `json:"result_type"`
 	List       interface{} `json:"list"`
 	Members    interface{} `json:"members"`
+}
+
+type Inquiry struct {
+	ID       string
+	Category string
+	Company  string
+	Name     string
+	Email    string
+	Content  string
 }
 
 func main() {
@@ -294,7 +313,7 @@ func IndexHandle(w http.ResponseWriter, r *http.Request) {
 				Page500(w, err.Error())
 				return
 			}
-		} else if mode == "name" || mode == "game" || mode == "offplay" || mode == "finish" || mode == "offannounce" || mode == "categorysetting" {
+		} else if mode == "name" || mode == "game" || mode == "offplay" || mode == "finish" || mode == "offannounce" || mode == "categorysetting" || mode == "inquiry" {
 			filename = mode
 		} else {
 			filename = "room"
@@ -666,7 +685,8 @@ func SocketHandle(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r2 *http.Request) bool { return true }
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("WebSocket upgrade failed: %v", err)
+		return
 	}
 
 	defer ws.Close()
@@ -1373,6 +1393,63 @@ func ApiHandle(w http.ResponseWriter, r *http.Request) {
 				ApiResponse(w, 400, -1, "insufficient parameter: page_path, left_html, right_html, top_html, bottom_html")
 			}
 			return
+		} else if mode == "inquiry" {
+			uuidV1, err := uuid.NewUUID()
+			if err != nil {
+				log.Println(err)
+				ApiResponse(w, 500, -1, "IDの発行に失敗しました")
+				return
+			}
+			inq := Inquiry{
+				ID:       uuidV1.String(),
+				Category: r.FormValue("category"),
+				Company:  r.FormValue("company"),
+				Name:     r.FormValue("name"),
+				Email:    r.FormValue("email"),
+				Content:  r.FormValue("content"),
+			}
+			if inq.Category == "" || inq.Name == "" || inq.Email == "" || inq.Content == "" {
+				ApiResponse(w, 400, -1, "")
+				return
+			}
+			SetCache("inq_"+inq.ID, inq)
+			ApiResponse(w, 200, 0, inq.ID)
+			return
+		} else if mode == "id" {
+			var inq Inquiry
+			err := GetCache("inq_"+r.FormValue("id"), &inq)
+			if err != nil {
+				ApiResponse(w, 404, -1, "存在しないIDが送信されました")
+				return
+			}
+			cache.Delete("inq_" + r.FormValue("id"))
+			inq.Category = strings.ReplaceAll(inq.Category, "<", "＜")
+			inq.Category = strings.ReplaceAll(inq.Category, ">", "＞")
+			inq.Company = strings.ReplaceAll(inq.Company, "<", "＜")
+			inq.Company = strings.ReplaceAll(inq.Company, ">", "＞")
+			inq.Name = strings.ReplaceAll(inq.Name, "<", "＜")
+			inq.Name = strings.ReplaceAll(inq.Name, ">", "＞")
+			inq.Email = strings.ReplaceAll(inq.Email, "<", "＜")
+			inq.Email = strings.ReplaceAll(inq.Email, ">", "＞")
+			inq.Content = strings.ReplaceAll(inq.Content, "<", "＜")
+			inq.Content = strings.ReplaceAll(inq.Content, ">", "＞")
+			str := fmt.Sprintf(
+				`<p>どこでもワードウルフのお問い合わせフォームから問い合わせが送信されました。<br>内容をご確認ください。<p>
+				<div style="font-weight: bold; margin: 1em 0;">カテゴリ</div><p>%s</p>
+				<div style="font-weight: bold; margin: 1em 0;">会社名</div><p>%s</p>
+				<div style="font-weight: bold; margin: 1em 0;">氏名</div><p>%s</p>
+				<div style="font-weight: bold; margin: 1em 0;">メールアドレス</div><p><a href="mailto:%s">%s</a></p>
+				<div style="font-weight: bold; margin: 1em 0;">お問い合わせ内容</div><pre>%s</pre>
+				`,
+				inq.Category, inq.Company, inq.Name, inq.Email, inq.Email, inq.Content)
+			err = util.SendMail("どこでもワードウルフ運営様", os.Getenv("MANAGER_MAIL"), "どこでもワードウルフへのお問い合わせ", str)
+			if err != nil {
+				log.Println(err)
+				ApiResponse(w, 500, -1, "メールの送信に失敗しました")
+				return
+			}
+			ApiResponse(w, 200, 0, "OK")
+			return
 		}
 		fmt.Fprintf(w, mode)
 	} else if r.Method == http.MethodPut {
@@ -1541,4 +1618,23 @@ func SiteMapHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(b)
+}
+
+func GetCache(name string, out any) error {
+	c, err := cache.Get(name)
+	if err != nil {
+		return err
+	}
+	dec := gob.NewDecoder(bytes.NewBuffer(c))
+	return dec.Decode(out)
+}
+
+func SetCache(key string, data any) {
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(data)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	cache.Set(key, buf.Bytes())
 }
